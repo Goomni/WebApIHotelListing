@@ -59,15 +59,16 @@ namespace WebApIHotelListing.Repository
         {
             try
             {
+                IQueryable<T> query = _db;
                 if (includes != null)
                 {
                     foreach (var include in includes)
                     {
-                        _db.Include(include);
+                        query = query.Include(include);
                     }
                 }
-
-                var result = await _db.AsNoTracking().FirstOrDefaultAsync(expression);
+                
+                var result = await query.AsNoTracking().FirstOrDefaultAsync(expression);
                 _logger.LogInformation($"[{typeof(T)}/Get] Get {string.Join(",", result)}");
                 return result;
             }
@@ -96,11 +97,20 @@ namespace WebApIHotelListing.Repository
                     }
                 }
 
-                var ordered = orderby?.Invoke(queryable);
-
-                var result = await ordered.AsNoTracking().ToListAsync();
-                _logger.LogInformation($"[{typeof(T)}/GetAll] GetAll {string.Join(",", result)}");
-                return result;
+                IOrderedQueryable<T> ordered = null;
+                if(orderby != null)
+                {
+                    ordered = orderby(queryable);
+                    var result = await ordered.AsNoTracking().ToListAsync();
+                    _logger.LogInformation($"[{typeof(T)}/GetAll] GetAll {string.Join(",", result)}");
+                    return result;
+                }
+                else
+                {
+                    var result = await queryable.AsNoTracking().ToListAsync();
+                    _logger.LogInformation($"[{typeof(T)}/GetAll] GetAll {string.Join(",", result)}");
+                    return result;
+                }                
             }
             catch (Exception ex)
             {

@@ -7,6 +7,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using WebApIHotelListing.Configuration;
 using WebApIHotelListing.Data;
+using WebApIHotelListing.IRepository;
+using WebApIHotelListing.Repository;
 
 namespace WebApIHotelListing
 {
@@ -37,6 +39,9 @@ namespace WebApIHotelListing
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApIHotelListing", Version = "v1" });
             });
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddControllers().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,7 +63,7 @@ namespace WebApIHotelListing
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
-            {
+            {                
                 endpoints.MapControllers();
             });
         }

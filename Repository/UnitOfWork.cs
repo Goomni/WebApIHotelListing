@@ -9,13 +9,13 @@ namespace WebApIHotelListing.Repository
     public class UnitOfWork : IUnitOfWork
     {
         private readonly AppDataContext _appDataContext;
-        private readonly ILogger _logger;
+        private readonly ILogger<UnitOfWork> _logger;
         private IRepository<Country> _countries;
         private IRepository<Hotel> _hotels;
         private bool _disposed;
         public IRepository<Country> Countries => _countries ??= new Repository<Country>(_appDataContext, _logger);
         public IRepository<Hotel> Hotels => _hotels ??= new Repository<Hotel>(_appDataContext, _logger);
-        public UnitOfWork(AppDataContext appDataContext, ILogger logger)
+        public UnitOfWork(AppDataContext appDataContext, ILogger<UnitOfWork> logger)
         {
             _appDataContext = appDataContext;
             _logger = logger;
