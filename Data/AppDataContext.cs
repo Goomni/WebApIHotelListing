@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using WebApIHotelListing.Configuration.Entity;
 
 namespace WebApIHotelListing.Data
 {
-    public class AppDataContext : DbContext
+    public class AppDataContext : IdentityDbContext<ApiUser>
     {
         public AppDataContext(DbContextOptions options) : base(options)
         {
@@ -12,55 +14,11 @@ namespace WebApIHotelListing.Data
         #region 데이터 시딩
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<Country>().HasData(
-                new Country
-                {
-                    Id = 1,
-                    Name = "Jamaica",
-                    ShortName = "JM"
-                },
+            base.OnModelCreating(builder);
 
-                new Country
-                {
-                    Id = 2,
-                    Name = "Bahams",
-                    ShortName = "BS"
-                },
-
-                new Country
-                {
-                    Id = 3,
-                    Name = "Cayman Island",
-                    ShortName = "CI"
-                });
-
-            builder.Entity<Hotel>().HasData(
-                new Hotel
-                {
-                    Id = 1,
-                    Name = "Jamaica Negril Hotel",
-                    Address = "Negril",
-                    CountryId = 1,
-                    Rating = 5
-                },
-
-                new Hotel
-                {
-                    Id = 2,
-                    Name = "Bahamas George Town Hotel",
-                    Address = "George Town",
-                    CountryId = 2,
-                    Rating = 4.5
-                },
-
-                new Hotel
-                {
-                    Id = 3,
-                    Name = "CI Nassua Hotel",
-                    Address = "Nassua",
-                    CountryId = 3,
-                    Rating = 4
-                });
+            builder.ApplyConfiguration(new RoleConfiguration());
+            builder.ApplyConfiguration(new CountryConfiguration());
+            builder.ApplyConfiguration(new HotelConfiguration());
         }
 
         #endregion 데이터 시딩

@@ -27,6 +27,9 @@ namespace WebApIHotelListing
             var connectionString = Configuration.GetConnectionString("sqlConnection");
             services.AddDbContext<AppDataContext>(options => options.UseSqlServer(connectionString));
 
+            services.AddAuthentication();
+            services.ConfigureIdentity();
+
             services.AddControllers();
             services.AddCors(options => 
             {
