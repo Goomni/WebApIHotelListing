@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -43,7 +44,8 @@ namespace WebApIHotelListing.Controllers
 
         static readonly List<string> include = new () { "Country" };
 
-        [HttpGet("{hotelID:int}")]
+        [Authorize]
+        [HttpGet("{hotelID:int}")]        
         public async Task<IActionResult> GetHotel([FromRoute] int hotelID)
         {
             try

@@ -9,6 +9,7 @@ using WebApIHotelListing.Configuration;
 using WebApIHotelListing.Data;
 using WebApIHotelListing.IRepository;
 using WebApIHotelListing.Repository;
+using WebApIHotelListing.Services;
 
 namespace WebApIHotelListing
 {
@@ -29,6 +30,7 @@ namespace WebApIHotelListing
 
             services.AddAuthentication();
             services.ConfigureIdentity();
+            services.ConfigureJWT(Configuration);
 
             services.AddControllers();
             services.AddCors(options => 
@@ -45,6 +47,7 @@ namespace WebApIHotelListing
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddControllers().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+            services.AddScoped<IAuthService, JWTAuthService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,6 +66,7 @@ namespace WebApIHotelListing
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

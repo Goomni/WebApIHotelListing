@@ -7,6 +7,7 @@ using System;
 using System.Threading.Tasks;
 using WebApIHotelListing.Data;
 using WebApIHotelListing.Models;
+using WebApIHotelListing.Services;
 
 namespace WebApIHotelListing.Controllers
 {
@@ -17,11 +18,14 @@ namespace WebApIHotelListing.Controllers
         private readonly UserManager<ApiUser> _userManager;
         private readonly ILogger<AccountController> _logger;
         private readonly IMapper _mapper;
-        public AccountController(UserManager<ApiUser> userManager, ILogger<AccountController> logger, IMapper mapper)
+        private readonly IAuthService _authService;
+
+        public AccountController(UserManager<ApiUser> userManager, ILogger<AccountController> logger, IMapper mapper, IAuthService authService)
         {
-            _userManager = userManager;            
+            _userManager = userManager;
             _logger = logger;
             _mapper = mapper;
+            _authService = authService;
         }
 
         [HttpPost]
@@ -51,27 +55,28 @@ namespace WebApIHotelListing.Controllers
             }
         }
 
-        //[HttpPost]
-        //[Route("login")]
-        //public async Task<IActionResult> Login([FromBody] LoginDTO loginDto)
-        //{
-        //    _logger.LogInformation($"Login Attempt for {loginDto.Email}");
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDTO loginDto)
+        {
+            _logger.LogInformation($"Login Attempt for {loginDto.Email}");
 
-        //    try
-        //    {
-        //        var result = await _signInManager.PasswordSignInAsync(loginDto.Email, loginDto.Password, false, false);
-        //        if (result.Succeeded == false)
-        //        {
-        //            _logger.LogError($"Login Attempt for {loginDto.Email} Failed!!!!! ModelState: {ModelState}");
-        //            return Unauthorized("Login Failed!");
-        //        }
-        //        return Accepted();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, $"Login Attempt for {loginDto.Email} Failed!!!!!");
-        //        return Problem($"Login Attempt for {loginDto.Email} Failed!!!!!", statusCode: 500);
-        //    }
-        //}
+            try
+            {
+                var result = await _authService.ValidateUser(loginDto);
+                if (result == false)
+                {
+                    _logger.LogError($"Login Attempt for {loginDto.Email} Failed!!!!! ModelState: {ModelState}");
+                    return Unauthorized("Login Failed!");
+                }
+                
+                return Accepted(new {Token = await _authService.CreateToken() });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Login Attempt for {loginDto.Email} Failed!!!!!");
+                return Problem($"Login Attempt for {loginDto.Email} Failed!!!!!", statusCode: 500);
+            }
+        }
     }
 }
