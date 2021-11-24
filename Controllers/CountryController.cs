@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using WebApIHotelListing.Data;
 using WebApIHotelListing.IRepository;
 using WebApIHotelListing.Models;
 
@@ -43,7 +45,7 @@ namespace WebApIHotelListing.Controllers
 
         static readonly List<string> includes = new() { "Hotels" };
 
-        [HttpGet("{countryID:int}")]
+        [HttpGet("{countryID:int}", Name = "GetCountry")]
         public async Task<IActionResult> GetCountry([FromRoute] int countryID)
         {
             try
@@ -56,6 +58,25 @@ namespace WebApIHotelListing.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"[{nameof(CountryController)}/{nameof(GetCountries)}] Something Wrong!");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CreateCountry([FromBody] CreateCountryDTO countryDTO)
+        {
+            try
+            {
+                var country = _mapper.Map<Country>(countryDTO);
+                await _unitOfWork.Countries.Insert(country);
+                await _unitOfWork.Save();
+
+                return CreatedAtRoute("GetCountry", new { countryID = country.Id }, country);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"[{nameof(CountryController)}/{nameof(CreateCountry)}] Something Wrong!");
                 return StatusCode(500, "Internal Server Error");
             }
         }

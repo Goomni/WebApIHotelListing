@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using WebApIHotelListing.Data;
 using WebApIHotelListing.IRepository;
 using WebApIHotelListing.Models;
 
@@ -45,7 +46,7 @@ namespace WebApIHotelListing.Controllers
         static readonly List<string> include = new () { "Country" };
 
         [Authorize]
-        [HttpGet("{hotelID:int}")]        
+        [HttpGet("{hotelID:int}", Name = "GetHotel")]        
         public async Task<IActionResult> GetHotel([FromRoute] int hotelID)
         {
             try
@@ -58,6 +59,44 @@ namespace WebApIHotelListing.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"[{nameof(HotelController)}/{nameof(GetHotel)}] Something Wrong!");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CreateHotel([FromBody] CreateHotelDTO hotelDTO)
+        {
+            try
+            {
+                var hotel = _mapper.Map<Hotel>(hotelDTO);
+                await _unitOfWork.Hotels.Insert(hotel);
+                await _unitOfWork.Save();
+
+                return CreatedAtRoute("GetHotel", new { hotelID = hotel.Id }, hotel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"[{nameof(HotelController)}/{nameof(CreateHotel)}] Something Wrong!");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        [Authorize]
+        [HttpPut]
+        public async Task<IActionResult> UpdateHotel(int id, [FromBody] CreateHotelDTO hotelDTO)
+        {
+            try
+            {
+                var hotel = _mapper.Map<Hotel>(hotelDTO);
+                await _unitOfWork.Hotels.Insert(hotel);
+                await _unitOfWork.Save();
+
+                return CreatedAtRoute("GetHotel", new { hotelID = hotel.Id }, hotel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"[{nameof(HotelController)}/{nameof(CreateHotel)}] Something Wrong!");
                 return StatusCode(500, "Internal Server Error");
             }
         }
